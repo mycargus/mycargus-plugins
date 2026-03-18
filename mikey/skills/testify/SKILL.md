@@ -83,7 +83,7 @@ Review and align tests with embedded test philosophy. Identifies code design iss
 
 #### Strategy B: Subagent Analysis (10+ files)
 
-Spawn the `analysis-agent` as a subagent for context isolation (keeps large file analysis out of the parent context window), passing the following context in the spawn prompt:
+Read the analysis prompt at `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/analysis-prompt.md` and spawn an `Explore` subagent for context isolation (keeps large file analysis out of the parent context window), passing the prompt content along with the following context:
 
 - **Test files**: absolute file paths, one per line, prefixed with `- `
 - **Source files**: absolute file paths, one per line, prefixed with `- `
@@ -210,4 +210,4 @@ If the full test suite fails after implementation, offer:
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` — test philosophy reference
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/report-template.md` — report structure template
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/examples/examples.md` — example report output
-- `${CLAUDE_PLUGIN_ROOT}/agents/analysis-agent.md` — analysis subagent
+- `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/analysis-prompt.md` — subagent analysis prompt

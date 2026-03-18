@@ -1,12 +1,11 @@
 {
   "name": "mikey",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Michael Hargiss's Claude Code plugin collection. Test philosophy alignment (/mikey:testify) and spec-driven TDD workflows (/mikey:tdd).",
   "author": {
     "name": "Michael Hargiss"
   },
   "license": "MIT",
   "skills": "./skills/",
-  "agents": "./agents/",
   "keywords": ["development", "testing", "tdd", "bdd", "spec", "given-when-then", "test-philosophy", "coverage", "quality"]
 }

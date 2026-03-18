@@ -1,46 +1,12 @@
----
-name: analysis-agent
-description: Use this agent when the testify skill needs to analyze 10+ files against test philosophy principles. Spawn with file lists, flags, and coverage data in the prompt. Returns structured JSON with test categorization, RITE evaluation, anti-patterns, negative test gaps, edge case gaps, optional code design analysis, and optional coverage analysis with grading.
+# Test Philosophy Analysis Prompt
 
-  <example>
-  Context: testify skill has gathered 15+ test and source files for analysis
-  user: "/mikey:testify src/ --with-design"
-  assistant: "File count exceeds 10, spawning analysis-agent for context isolation."
-  <commentary>
-  Large file sets benefit from subagent context isolation. The analysis-agent receives file lists and flags, performs thorough analysis, and returns structured JSON.
-  </commentary>
-  </example>
+Use this prompt when spawning a subagent for large-scale test analysis (10+ files).
 
-  <example>
-  Context: testify skill running with coverage data on a large test suite
-  user: "/mikey:testify tests/ --with-coverage --with-design"
-  assistant: "Spawning analysis-agent with coverage data and design analysis enabled."
-  <commentary>
-  Coverage + design analysis on many files is a heavy workload best isolated in a subagent.
-  </commentary>
-  </example>
-
-model: inherit
-color: cyan
-tools: ["Read", "Grep", "Glob", "Bash"]
----
-
-# Test Philosophy Analysis Agent
-
-## Task
+## Instructions for the Subagent
 
 Analyze test files and source files against test philosophy principles. Return findings as valid JSON.
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` for the complete test philosophy reference. Apply those principles throughout this analysis.
-
-## Input
-
-You will receive the following in your spawn prompt:
-- **Test files**: A list of absolute file paths to test files
-- **Source files**: A list of absolute file paths to source files
-- **include_design**: `true` or `false` — whether to perform code design analysis
-- **include_coverage**: `true` or `false` — whether to incorporate coverage data
-- **coverage_data**: Coverage summaries (or `N/A` if not available)
 
 ## What to Analyze
 
