@@ -8,6 +8,31 @@ Analyze test files and source files against test philosophy principles. Return f
 
 Read `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` for the complete test philosophy reference. Apply those principles throughout this analysis.
 
+## Expected Input
+
+The spawn prompt must include the following labeled sections:
+
+### Test Files
+Absolute file paths, one per line, prefixed with `- `:
+```
+- /absolute/path/to/test_file1.test.js
+- /absolute/path/to/test_file2.test.js
+```
+
+### Source Files
+Absolute file paths, one per line, prefixed with `- `:
+```
+- /absolute/path/to/source1.js
+- /absolute/path/to/source2.js
+```
+
+### Flags
+- **include_design**: `true` or `false` — whether to perform code design analysis (section 4)
+- **include_coverage**: `true` or `false` — whether to incorporate coverage data (section 5)
+
+### Coverage Data
+Coverage summaries from the test runner, or `N/A` if not available. When present, use as ground truth in section 5.
+
 ## What to Analyze
 
 Perform ALL of the following that apply:
