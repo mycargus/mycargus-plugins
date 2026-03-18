@@ -29,6 +29,18 @@ Open claude and type `/mikey:tdd` to see optional parameters.
 
 See [mikey/skills/tdd/SKILL.md](mikey/skills/tdd/SKILL.md) for more information.
 
+## Releasing
+
+1. Update `plugin.json` version
+2. Commit: `git commit -m "release vX.Y.Z"`
+3. Tag and push:
+   ```bash
+   git tag vX.Y.Z
+   git push origin main vX.Y.Z
+   ```
+
+The [release workflow](.github/workflows/release.yml) automatically creates a GitHub release from the tag.
+
 ## License
 
 MIT
