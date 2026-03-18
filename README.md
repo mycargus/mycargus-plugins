@@ -32,10 +32,10 @@ See [mikey/skills/tdd/SKILL.md](mikey/skills/tdd/SKILL.md) for more information.
 ## Releasing
 
 1. Update `plugin.json` version
-2. Commit: `git commit -m "release vX.Y.Z"`
-3. Tag and push:
+2. Commit changes
+3. Create an annotated tag and push:
    ```bash
-   git tag vX.Y.Z
+   git tag -a vX.Y.Z -m "summary of changes"
    git push origin main vX.Y.Z
    ```
 
