@@ -10,7 +10,7 @@ Specs describe user scenarios using the Given/When/Then pattern:
 
 ## Accepted Formats
 
-The spec-driven-dev skill accepts any text format containing Given/When/Then patterns. It does not enforce strict Gherkin syntax.
+The tdd skill accepts any text format containing Given/When/Then patterns. It does not enforce strict Gherkin syntax.
 
 ### Gherkin (.feature files)
 

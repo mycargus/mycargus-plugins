@@ -1,8 +1,8 @@
 ---
-name: testify
+name: mikey:testify
 description: Review and align tests with test philosophy. Identifies code design issues (I/O mixed with logic), implementation detail testing, excessive mocking, negative test coverage gaps (untested error paths/validations in source), and suggests or implements improvements.
 argument-hint: [path] [--with-design] [--with-coverage] [--implement] [--export]
-allowed-tools: [Read, Write, Glob, Grep, Bash, AskUserQuestion, Agent, Skill]
+user-invocable: true
 ---
 
 # Test Philosophy Alignment Skill

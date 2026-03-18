@@ -1,16 +1,16 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
-  "name": "mycargus-plugins",
+  "name": "mikey-claude-plugins",
   "metadata": {
-    "description": "Michael Hargiss's personal Claude Code plugins"
+    "description": "Michael 'Mikey' Hargiss's personal Claude Code plugins"
   },
   "owner": {
     "name": "Michael Hargiss"
   },
   "plugins": [
     {
-      "name": "mycargus",
-      "source": "./mycargus",
+      "name": "mikey",
+      "source": "./mikey",
       "category": "development"
     }
   ]

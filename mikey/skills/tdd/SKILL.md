@@ -1,8 +1,8 @@
 ---
-name: spec-driven-dev
+name: mikey:tdd
 description: TDD workflow driven by Given/When/Then specifications. Provide a spec file or folder path for autonomous batch processing, or run without a path for an interactive TDD loop. Implements code using Functional Core / Imperative Shell design principles.
 argument-hint: [path] [--plan] [--verify] [--export]
-allowed-tools: [Read, Write, Glob, Grep, Bash, AskUserQuestion, Agent, Skill]
+user-invocable: true
 ---
 
 # Spec-Driven Development Skill
@@ -31,7 +31,7 @@ Test-Driven Development workflow guided by Given/When/Then specifications and th
 4. Minimal implementation — only write code required by the current test
 
 **Philosophy reference:** `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md`
-**Spec format reference:** `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/references/spec-format.md`
+**Spec format reference:** `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md`
 
 ## Execution Strategy
 
@@ -66,7 +66,7 @@ Test-Driven Development workflow guided by Given/When/Then specifications and th
 
 1. If path is a file, read it
 2. If path is a directory, glob for spec files: `**/*.feature`, `**/*.md`, `**/*.txt`, `**/*.spec`
-3. Read the spec format reference: `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/references/spec-format.md`
+3. Read the spec format reference: `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md`
 4. Parse Given/When/Then scenarios from the files using the parsing rules in the reference
 5. Group scenarios by feature/file
 
@@ -98,10 +98,10 @@ If `--plan` is not set: Ask the user to confirm before proceeding. Use AskUserQu
 
 #### Step 3: Spawn TDD Agent
 
-1. Read the agent template: `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/agents/tdd-agent.md`
+1. Read the agent template: `${CLAUDE_PLUGIN_ROOT}/skills/tdd/agents/tdd-agent.md`
 2. Assemble the prompt by replacing placeholders:
    - `{{PHILOSOPHY_PATH}}` — absolute path to `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md`
-   - `{{SPEC_FORMAT_PATH}}` — absolute path to `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/references/spec-format.md`
+   - `{{SPEC_FORMAT_PATH}}` — absolute path to `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md`
    - `{{LANGUAGE}}` — detected language/framework
    - `{{TEST_RUNNER}}` — detected test command
    - `{{TEST_PATTERN}}` — detected test file pattern
@@ -116,7 +116,7 @@ If `--plan` is not set: Ask the user to confirm before proceeding. Use AskUserQu
 
 After the agent completes:
 1. Show final test suite results
-2. If `--verify` is true and testify is available: invoke `/mycargus:testify` on the test directory with `--with-design`
+2. If `--verify` is true and testify is available: invoke `/mikey:testify` on the test directory with `--with-design`
 3. If `--verify` is true but testify is NOT available: warn the user
 4. If `--export`: write report (see Export section)
 
@@ -197,7 +197,7 @@ If "done": proceed to Post-Completion.
    - Scenarios implemented
    - Tests written (categorized: unit pure / unit mocked / integration)
    - Pure functions created, I/O shells, orchestrators
-3. If `--verify` is true and testify is available: invoke `/mycargus:testify` on the test directory with `--with-design`
+3. If `--verify` is true and testify is available: invoke `/mikey:testify` on the test directory with `--with-design`
 4. If `--verify` is true but testify is NOT available: warn the user that testify skill was not found
 5. If `--export`: write report (see Export section)
 
@@ -207,7 +207,7 @@ Use this text for `{{VERIFY_INSTRUCTIONS}}` based on the verify state:
 
 **If verify is enabled and testify is available:**
 ```
-After all scenarios are complete, the parent skill will invoke /mycargus:testify for verification. No action needed from you.
+After all scenarios are complete, the parent skill will invoke /mikey:testify for verification. No action needed from you.
 ```
 
 **If verify is enabled but testify is NOT available:**
@@ -280,7 +280,7 @@ When `--export` is set, write a session report to `sdd-report-<timestamp>.md` us
 ## Important Notes
 
 - Read the philosophy at `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` before any analysis or implementation
-- Read the spec format at `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/references/spec-format.md` when parsing spec files
+- Read the spec format at `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md` when parsing spec files
 - The TDD cycle is strict: RED (failing test) → GREEN (minimal pass) → REFACTOR. Never skip steps.
 - Code design (functional core / imperative shell) is applied during GREEN and REFACTOR, not as a separate phase
 - Match the project's existing conventions for test location, naming, assertion style, and file organization
@@ -288,6 +288,6 @@ When `--export` is set, write a session report to `sdd-report-<timestamp>.md` us
 ## Related Documentation
 
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` — test philosophy reference
-- `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/references/spec-format.md` — spec format reference
-- `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/examples/examples.md` — example workflows
-- `${CLAUDE_PLUGIN_ROOT}/skills/spec-driven-dev/agents/tdd-agent.md` — TDD agent template
+- `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md` — spec format reference
+- `${CLAUDE_PLUGIN_ROOT}/skills/tdd/examples/examples.md` — example workflows
+- `${CLAUDE_PLUGIN_ROOT}/skills/tdd/agents/tdd-agent.md` — TDD agent template

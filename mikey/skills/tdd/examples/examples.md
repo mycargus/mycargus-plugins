@@ -1,4 +1,4 @@
-# spec-driven-dev — Example Workflows
+# tdd — Example Workflows
 
 ## Example Spec File
 
@@ -128,7 +128,7 @@ Starting TDD loop...
 
 All 4 scenarios implemented. 4/4 tests passing.
 
-Running /mycargus:testify for verification...
+Running /mikey:testify for verification...
 [testify output would appear here]
 ```
 
@@ -170,5 +170,5 @@ Next behavior? (or "done" to finish):
 
 Session complete. 1 scenario implemented, 1/1 tests passing.
 
-Note: testify skill not found. Verify the mycargus plugin is fully installed for automatic test quality verification.
+Note: testify skill not found. Verify the mikey plugin is fully installed for automatic test quality verification.
 ```
