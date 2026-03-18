@@ -1,6 +1,6 @@
 {
   "name": "mycargus",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Michael Hargiss's Claude Code plugin collection. Test philosophy alignment (/mycargus:testify) and spec-driven TDD workflows (/mycargus:spec-driven-dev).",
   "author": {
     "name": "Michael Hargiss"

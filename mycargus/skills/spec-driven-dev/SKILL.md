@@ -2,6 +2,7 @@
 name: spec-driven-dev
 description: TDD workflow driven by Given/When/Then specifications. Provide a spec file or folder path for autonomous batch processing, or run without a path for an interactive TDD loop. Implements code using Functional Core / Imperative Shell design principles.
 argument-hint: [path] [--plan] [--verify] [--export]
+allowed-tools: [Read, Write, Glob, Grep, Bash, AskUserQuestion, Agent, Skill]
 ---
 
 # Spec-Driven Development Skill
