@@ -83,16 +83,15 @@ Review and align tests with embedded test philosophy. Identifies code design iss
 
 #### Strategy B: Subagent Analysis (10+ files)
 
-1. Read the agent template: `${CLAUDE_PLUGIN_ROOT}/skills/testify/agents/analysis-agent.md`
-2. Assemble the prompt by replacing placeholders:
-   - `{{TEST_FILES}}` — absolute file paths, one per line, prefixed with `- `
-   - `{{SOURCE_FILES}}` — absolute file paths, one per line, prefixed with `- `
-   - `{{INCLUDE_DESIGN}}` — `true` if `--with-design`, else `false`
-   - `{{INCLUDE_COVERAGE}}` — `true` if `--with-coverage`, else `false`
-   - `{{COVERAGE_DATA}}` — coverage summaries from Phase 1 (or `N/A` if not available)
-   - `{{PHILOSOPHY_PATH}}` — absolute path to `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md`
-3. Spawn as an `Explore` agent
-4. Wait for completion
+Spawn the `analysis-agent` as a subagent for context isolation (keeps large file analysis out of the parent context window), passing the following context in the spawn prompt:
+
+- **Test files**: absolute file paths, one per line, prefixed with `- `
+- **Source files**: absolute file paths, one per line, prefixed with `- `
+- **include_design**: `true` if `--with-design`, else `false`
+- **include_coverage**: `true` if `--with-coverage`, else `false`
+- **coverage_data**: coverage summaries from Phase 1 (or `N/A` if not available)
+
+Wait for agent completion.
 
 ### Phase 3: Synthesis
 
@@ -211,4 +210,4 @@ If the full test suite fails after implementation, offer:
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` — test philosophy reference
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/report-template.md` — report structure template
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/examples/examples.md` — example report output
-- `${CLAUDE_PLUGIN_ROOT}/skills/testify/agents/analysis-agent.md` — subagent prompt template
+- `${CLAUDE_PLUGIN_ROOT}/agents/analysis-agent.md` — analysis subagent

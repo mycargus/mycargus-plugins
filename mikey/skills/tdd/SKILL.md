@@ -98,19 +98,40 @@ If `--plan` is not set: Ask the user to confirm before proceeding. Use AskUserQu
 
 #### Step 3: Spawn TDD Agent
 
-1. Read the agent template: `${CLAUDE_PLUGIN_ROOT}/skills/tdd/agents/tdd-agent.md`
-2. Assemble the prompt by replacing placeholders:
-   - `{{PHILOSOPHY_PATH}}` — absolute path to `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md`
-   - `{{SPEC_FORMAT_PATH}}` — absolute path to `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md`
-   - `{{LANGUAGE}}` — detected language/framework
-   - `{{TEST_RUNNER}}` — detected test command
-   - `{{TEST_PATTERN}}` — detected test file pattern
-   - `{{SOURCE_DIR}}` — detected source directory
-   - `{{TEST_DIR}}` — detected test directory
-   - `{{SCENARIOS}}` — the selected scenarios, formatted as numbered Given/When/Then blocks
-   - `{{VERIFY_INSTRUCTIONS}}` — see Verify Instructions below
-3. Spawn as a `general-purpose` agent
-4. Wait for completion
+Spawn a `general-purpose` agent with a prompt that includes:
+
+1. **Role**: "You are a TDD agent. Implement features by strictly following the Red-Green-Refactor cycle for each scenario."
+2. **Philosophy**: Instruct the agent to read `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` before starting
+3. **Spec format**: Instruct the agent to read `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md` for parsing rules
+4. **Project context** (detected in Phase 1):
+   - Language/framework
+   - Test runner command
+   - Test file pattern
+   - Source directory
+   - Test directory
+5. **Scenarios**: The selected scenarios, formatted as numbered Given/When/Then blocks
+6. **Test naming convention** — follow RITEway principles. Each test should answer the 5 Questions structurally. When the project uses a RITEway assertion library, map Given/When/Then to RITEway's `assert()` interface:
+   - `given`: the precondition (from the spec's Given clause)
+   - `should`: the expected behavior (from When + Then)
+   - `actual`: the actual return value
+   - `expected`: the expected return value
+   - Example: Given "an empty cart" / When "adding an item" / Then "cart contains 1 item" becomes `assert({ given: 'an empty cart', should: 'contain 1 item after adding', actual: cart.count(), expected: 1 })`
+   - When RITEway is not available, use descriptive test names that mirror the Given/When/Then language from the spec.
+7. **Execution protocol** — include this in the spawn prompt:
+   - **RED**: Write a failing test for the scenario. Test observable behavior, follow RITE principles, answer the 5 Questions, match project conventions. Run tests — confirm failure.
+     - Determine test type: pure logic (calculation, transformation, validation) gets a unit test with no mocks. I/O behavior (file ops, network, CLI) gets an integration test through real entry points.
+   - **GREEN**: Write minimum code to pass. Apply Functional Core / Imperative Shell — pure logic in pure functions (no I/O, deterministic), I/O in thin wrapper functions. If the scenario requires both, write them as separate functions. Do NOT add code beyond what the test requires. Run tests — confirm ALL tests pass.
+   - **REFACTOR**: Review for I/O mixed with logic (extract pure functions), duplication (extract only if genuinely duplicated), naming clarity, test quality (still RITE? testing behavior not implementation?). Re-run tests if changes made. If no refactoring needed, state why briefly.
+   - Between scenarios, output: `Scenario {N}/{total}: {name} — {test count} tests passing`
+   - After all scenarios: run full test suite, summarize tests written (unit pure / unit mocked / integration), list pure functions, I/O shells, and orchestrators created.
+8. **Code design principles**: Functional Core / Imperative Shell is mandatory. Pure functions get unit tests (no mocks). I/O gets integration tests. Never mock pure functions. Max 2-3 mocks per test for unavailable external services only.
+9. **Output expectations**: Show actual test output (not summaries). Show actual code written. Never fabricate test results. If a test unexpectedly fails during GREEN, debug and fix — do NOT skip.
+10. **Verify instructions**:
+   - If verify is enabled and testify is available: "After all scenarios are complete, the parent skill will invoke /mikey:testify for verification. No action needed from you."
+   - If verify is enabled but testify is NOT available: "After all scenarios, warn the user that the testify skill was not found at `${CLAUDE_PLUGIN_ROOT}/skills/testify/SKILL.md`."
+   - If verify is disabled: "No verification step. Skip."
+
+Wait for agent completion.
 
 #### Step 4: Post-Completion
 
@@ -201,25 +222,6 @@ If "done": proceed to Post-Completion.
 4. If `--verify` is true but testify is NOT available: warn the user that testify skill was not found
 5. If `--export`: write report (see Export section)
 
-## Verify Instructions
-
-Use this text for `{{VERIFY_INSTRUCTIONS}}` based on the verify state:
-
-**If verify is enabled and testify is available:**
-```
-After all scenarios are complete, the parent skill will invoke /mikey:testify for verification. No action needed from you.
-```
-
-**If verify is enabled but testify is NOT available:**
-```
-After all scenarios, warn the user that the testify skill was not found at ${CLAUDE_PLUGIN_ROOT}/skills/testify/SKILL.md.
-```
-
-**If verify is disabled:**
-```
-No verification step. Skip.
-```
-
 ## Export
 
 When `--export` is set, write a session report to `sdd-report-<timestamp>.md` using `date +%Y%m%d-%H%M%S` for the timestamp. Include:
@@ -290,4 +292,3 @@ When `--export` is set, write a session report to `sdd-report-<timestamp>.md` us
 - `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` — test philosophy reference
 - `${CLAUDE_PLUGIN_ROOT}/skills/tdd/references/spec-format.md` — spec format reference
 - `${CLAUDE_PLUGIN_ROOT}/skills/tdd/examples/examples.md` — example workflows
-- `${CLAUDE_PLUGIN_ROOT}/skills/tdd/agents/tdd-agent.md` — TDD agent template

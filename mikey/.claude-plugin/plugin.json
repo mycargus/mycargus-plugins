@@ -6,6 +6,7 @@
     "name": "Michael Hargiss"
   },
   "license": "MIT",
-  "skills": ["./skills/"],
+  "skills": "./skills/",
+  "agents": "./agents/",
   "keywords": ["development", "testing", "tdd", "bdd", "spec", "given-when-then", "test-philosophy", "coverage", "quality"]
 }
