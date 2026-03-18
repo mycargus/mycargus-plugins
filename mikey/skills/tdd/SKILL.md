@@ -1,7 +1,7 @@
 ---
 name: mikey:tdd
 description: TDD workflow driven by Given/When/Then specifications. Provide a spec file or folder path for autonomous batch processing, or run without a path for an interactive TDD loop. Implements code using Functional Core / Imperative Shell design principles.
-argument-hint: [path] [--plan] [--verify] [--export]
+argument-hint: [path] [--plan] [--validate] [--export]
 user-invocable: true
 ---
 
@@ -13,7 +13,7 @@ user-invocable: true
 |-----------|-------------|
 | `path` | File or folder containing Given/When/Then specs (triggers agent mode) |
 | `--plan` | Show implementation plan only, do not write code |
-| `--verify` | Run `/testify` after completion (default: auto-detect — true if testify installed, false otherwise) |
+| `--validate` | Run `/testify` after completion (default: auto-detect — true if testify installed, false otherwise) |
 | `--export` | Save session report to `sdd-report-<timestamp>.md` |
 
 ## Description
@@ -40,7 +40,7 @@ Test-Driven Development workflow guided by Given/When/Then specifications and th
 1. **Parse arguments** to extract:
    - Target path (optional — file or folder of spec files)
    - `--plan` flag (plan only, do not implement)
-   - `--verify` flag (run testify after completion)
+   - `--validate` flag (run testify after completion)
    - `--export` flag (save report)
 
 2. **Detect project conventions** by examining project files:
@@ -53,8 +53,8 @@ Test-Driven Development workflow guided by Given/When/Then specifications and th
 3. **Detect testify availability**:
    - Testify is a sibling skill in this plugin: `${CLAUDE_PLUGIN_ROOT}/skills/testify/SKILL.md`
    - Check if the testify skill file exists at that path
-   - If `--verify` was not explicitly set: default to `true` if testify skill exists, `false` otherwise
-   - If `--verify` was explicitly set to `true` but testify is not available: warn the user
+   - If `--validate` was not explicitly set: default to `true` if testify skill exists, `false` otherwise
+   - If `--validate` was explicitly set to `true` but testify is not available: warn the user
 
 4. **Route to mode**:
    - If `path` is provided → **Agent Mode** (Phase 2A)
@@ -122,14 +122,15 @@ Spawn a `general-purpose` agent with a prompt that includes:
      - Determine test type: pure logic (calculation, transformation, validation) gets a unit test with no mocks. I/O behavior (file ops, network, CLI) gets an integration test through real entry points.
    - **GREEN**: Write minimum code to pass. Apply Functional Core / Imperative Shell — pure logic in pure functions (no I/O, deterministic), I/O in thin wrapper functions. If the scenario requires both, write them as separate functions. Do NOT add code beyond what the test requires. Run tests — confirm ALL tests pass.
    - **REFACTOR**: Review for I/O mixed with logic (extract pure functions), duplication (extract only if genuinely duplicated), naming clarity, test quality (still RITE? testing behavior not implementation?). Re-run tests if changes made. If no refactoring needed, state why briefly.
+   - **VALIDATE** (if validate is enabled and testify is available): After each scenario's REFACTOR step, review code design and test quality alignment against the test philosophy. Check: Is I/O separated from logic? Are tests testing observable behavior? Are there untested error paths introduced by this scenario? Fix issues before proceeding to the next scenario. This catches design drift early rather than accumulating it across all scenarios.
    - Between scenarios, output: `Scenario {N}/{total}: {name} — {test count} tests passing`
    - After all scenarios: run full test suite, summarize tests written (unit pure / unit mocked / integration), list pure functions, I/O shells, and orchestrators created.
 8. **Code design principles**: Functional Core / Imperative Shell is mandatory. Pure functions get unit tests (no mocks). I/O gets integration tests. Never mock pure functions. Max 2-3 mocks per test for unavailable external services only.
 9. **Output expectations**: Show actual test output (not summaries). Show actual code written. Never fabricate test results. If a test unexpectedly fails during GREEN, debug and fix — do NOT skip.
-10. **Verify instructions**:
-   - If verify is enabled and testify is available: "After all scenarios are complete, the parent skill will invoke /mikey:testify for verification. No action needed from you."
-   - If verify is enabled but testify is NOT available: "After all scenarios, warn the user that the testify skill was not found at `${CLAUDE_PLUGIN_ROOT}/skills/testify/SKILL.md`."
-   - If verify is disabled: "No verification step. Skip."
+10. **Validate instructions**:
+   - If validate is enabled and testify is available: "Run VALIDATE after each scenario's REFACTOR step (per-scenario code design and test quality review). After all scenarios are complete, the parent skill will invoke /mikey:testify for a final comprehensive review."
+   - If validate is enabled but testify is NOT available: "After all scenarios, warn the user that the testify skill was not found at `${CLAUDE_PLUGIN_ROOT}/skills/testify/SKILL.md`."
+   - If validate is disabled: "No validation step. Skip VALIDATE between scenarios."
 
 Wait for agent completion.
 
@@ -137,8 +138,8 @@ Wait for agent completion.
 
 After the agent completes:
 1. Show final test suite results
-2. If `--verify` is true and testify is available: invoke `/mikey:testify` on the test directory with `--with-design`
-3. If `--verify` is true but testify is NOT available: warn the user
+2. If `--validate` is true and testify is available: invoke `/mikey:testify` on the test directory with `--with-design`
+3. If `--validate` is true but testify is NOT available: warn the user
 4. If `--export`: write report (see Export section)
 
 ### Phase 2B: Interactive Mode (no spec path)
@@ -218,8 +219,8 @@ If "done": proceed to Post-Completion.
    - Scenarios implemented
    - Tests written (categorized: unit pure / unit mocked / integration)
    - Pure functions created, I/O shells, orchestrators
-3. If `--verify` is true and testify is available: invoke `/mikey:testify` on the test directory with `--with-design`
-4. If `--verify` is true but testify is NOT available: warn the user that testify skill was not found
+3. If `--validate` is true and testify is available: invoke `/mikey:testify` on the test directory with `--with-design`
+4. If `--validate` is true but testify is NOT available: warn the user that testify skill was not found
 5. If `--export`: write report (see Export section)
 
 ## Export
