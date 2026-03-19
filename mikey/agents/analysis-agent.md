@@ -1,6 +1,6 @@
 ---
 name: analysis-agent
-description: Use this agent when testify needs to analyze test and source files against the test philosophy for large codebases (10+ files). Returns structured JSON analysis including test patterns, negative coverage gaps, edge case gaps, code design, and coverage data.
+description: Use this agent when testify needs to analyze test and source files against the test philosophy. Returns structured JSON analysis including test patterns, negative coverage gaps, edge case gaps, code design, and coverage data.
 model: inherit
 color: cyan
 tools: ["Read", "Grep", "Glob"]
