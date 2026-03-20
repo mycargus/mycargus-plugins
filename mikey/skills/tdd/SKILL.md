@@ -258,6 +258,7 @@ When `--export` is set, write a session report to `sdd-report-<timestamp>.md` us
 - Mock pure functions
 - Fabricate test results — always run the actual test command and show output
 
+
 ## Important Notes
 
 - Read and apply the test philosophy from `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` before any analysis or implementation

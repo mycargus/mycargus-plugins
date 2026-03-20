@@ -63,6 +63,8 @@ For each test file:
 
 5. **Calculate metrics**: Mock count, assertion count, and ratio per test file
 
+6. **Check file size**: Count lines in each test file. Any test file exceeding 500 lines is a MEDIUM-severity anti-pattern (`file_too_long`). Suggest splitting by feature or behavior.
+
 ### 2. Negative Test Coverage Gaps (always)
 
 Read the source files and scan for **every** error path:

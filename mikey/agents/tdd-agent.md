@@ -65,6 +65,10 @@ When RITEway is not available, use descriptive test names that mirror the Given/
 
 Functional Core / Imperative Shell is mandatory. Pure functions get unit tests (no mocks). I/O gets integration tests. Never mock pure functions. Max 2-3 mocks per test for unavailable external services only.
 
+## Test File Size Limit
+
+Test files must not exceed 500 lines. Before adding a test, check the target file's line count. If adding the test would push it past 500 lines, split into a new test file (grouped by feature or behavior) before writing the test.
+
 ## Output Expectations
 
 Show actual test output (not summaries). Show actual code written. Never fabricate test results. If a test unexpectedly fails during GREEN, debug and fix — do NOT skip.
