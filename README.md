@@ -2,6 +2,10 @@
 
 My personal Claude Code plugin collection.
 
+## Prerequisites
+
+- [jq](https://jqlang.github.io/jq/) — used by plugin hooks to parse tool input
+
 ## Installation
 
 Install via the Claude Code marketplace by pointing at this repo:
