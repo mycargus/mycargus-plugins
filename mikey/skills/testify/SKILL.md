@@ -1,7 +1,7 @@
 ---
 name: mikey:testify
-description: Review and align tests with test philosophy. Identifies code design issues (I/O mixed with logic), implementation detail testing, excessive mocking, negative test coverage gaps (untested error paths/validations in source), and suggests or implements improvements.
-argument-hint: [path] [--with-design] [--with-coverage] [--implement] [--export]
+description: Review and align tests with test philosophy. Identifies code design issues (I/O mixed with logic), implementation detail testing, excessive mocking, negative test coverage gaps (untested error paths/validations in source), and suggests improvements. Use --plan to generate a saved implementation plan without bloating the current context.
+argument-hint: [path] [--with-design] [--with-coverage] [--plan] [--export]
 user-invocable: true
 ---
 
@@ -14,12 +14,12 @@ user-invocable: true
 | `path` | Target directory or file (default: project test directory) |
 | `--with-design` | Analyze source code for I/O/logic mixing |
 | `--with-coverage` | Run tests with coverage, find untested code |
-| `--implement` | Apply fixes after analysis |
+| `--plan` | Generate implementation plan and save to project root |
 | `--export` | Save report to `testify-report-<timestamp>.md` |
 
 ## Description
 
-Review and align tests with embedded test philosophy. Identifies code design issues (I/O mixed with logic), implementation detail testing, excessive mocking, negative test coverage gaps, and suggests or implements improvements.
+Review and align tests with embedded test philosophy. Identifies code design issues (I/O mixed with logic), implementation detail testing, excessive mocking, negative test coverage gaps, and suggests improvements.
 
 **Use when:**
 - Adding new test files
@@ -34,7 +34,7 @@ Review and align tests with embedded test philosophy. Identifies code design iss
 3. Identifies discrepancies (implementation testing, brittle assertions, excessive mocking)
 4. **Always** cross-references source validations against tests to find negative coverage gaps
 5. Provides structured report with specific improvements
-6. Can optionally implement the improvements
+6. Can optionally generate a saved implementation plan (via `--plan`)
 
 **Philosophy reference:** `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md`
 
@@ -46,7 +46,7 @@ Review and align tests with embedded test philosophy. Identifies code design iss
    - Target path (default: detect from project structure)
    - `--with-design` flag (analyze source code structure)
    - `--with-coverage` flag (find untested code)
-   - `--implement` flag (apply fixes after analysis)
+   - `--plan` flag (generate and save an implementation plan after analysis)
 
 2. **Detect project conventions** by examining project files:
    - **Language and framework**: Look for `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `pom.xml`, `build.gradle`, `Gemfile`, `*.csproj`, etc.
@@ -137,48 +137,53 @@ Generate a structured markdown report following the template in `${CLAUDE_PLUGIN
 
 Write the report to `testify-report-<timestamp>.md` in the project root using `date +%Y%m%d-%H%M%S` for the timestamp.
 
-### Phase 5: Implementation (if --implement)
+### Phase 4.75: Plan Prompt (if --plan was NOT specified)
 
-#### Step 1: Present Implementation Plan
+After displaying the report, use AskUserQuestion to ask:
 
-After showing the report, present a numbered list of specific changes. Every item MUST reference actual findings from the analysis phase with file:line.
+> "Would you like me to generate an implementation plan and save it to the project root?"
+> Options: "Yes, include all findings", "Yes, HIGH priority only", "Yes, HIGH and MEDIUM only", "No"
 
-#### Step 2: Ask for Confirmation
+- "Yes, include all findings" → proceed to Phase 5 with all findings
+- "Yes, HIGH priority only" → proceed to Phase 5, instruct Plan agent to include only HIGH findings
+- "Yes, HIGH and MEDIUM only" → proceed to Phase 5, instruct Plan agent to include only HIGH and MEDIUM findings
+- "No" → stop here
 
-Use AskUserQuestion:
-- "All fixes (Recommended)"
-- "Code design fixes only"
-- "Test fixes only"
-- "Let me pick specific items"
+Pass the chosen scope to Phase 5 so the Plan agent's instruction reflects it.
 
-#### Step 3: Execute Fixes
+### Phase 5: Planning (if --plan was specified, or user said yes in Phase 4.75)
 
-For each approved fix:
-- **Design extraction**: Extract pure logic from mixed I/O functions into separate testable functions
-- **Test simplification**: Replace implementation-testing assertions with behavior-testing assertions
-- **Integration conversion**: Replace heavily mocked tests with integration tests using real entry points
-- **Brittle assertion fixes**: Replace exact format checks with structural assertions
+Before spawning the Plan agent, read `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` yourself and embed its content into the agent prompt.
 
-#### Step 4: Verify Changes
+Spawn a `Plan` subagent with a prompt containing:
 
-After each fix or batch:
-1. Run affected tests and show actual output
-2. If tests pass, continue to next fix
-3. If tests fail, show failure output and ask user how to proceed
+- The full report from Phase 4 (paste inline)
+- The test philosophy content (paste inline — do not pass a file path)
+- The source and test file lists from Phase 1
+- This instruction, with `{scope}` replaced by the chosen scope:
+  - `--plan` specified upfront → scope = "all findings (HIGH, MEDIUM, and LOW)"
+  - User chose "Yes, include all findings" → scope = "all findings (HIGH, MEDIUM, and LOW)"
+  - User chose "Yes, HIGH and MEDIUM only" → scope = "only HIGH and MEDIUM findings — omit LOW"
+  - User chose "Yes, HIGH priority only" → scope = "only HIGH findings — omit MEDIUM and LOW"
 
-#### Step 5: Final Verification
+  > Produce a prioritized, step-by-step implementation plan. Output only the plan — no code, no preamble. Include {scope}. Structure it as follows:
+  >
+  > ## Summary
+  > One paragraph: overall test quality state and grade.
+  >
+  > ## Steps
+  > Numbered list. Each step must include:
+  > - **What**: concrete description of the change (not just "add a test" — name the scenario, the input, the expected behavior)
+  > - **Why**: the finding it addresses, with `[file:line]` reference and its priority (HIGH / MEDIUM / LOW)
+  > - **Risk**: `low` (test-only) | `medium` (adds/moves source code) | `high` (restructures source code)
+  >
+  > Order by impact: design violations → negative coverage gaps → edge case gaps → style/low issues.
 
-After all fixes:
-1. Run the full test suite — show actual output
-2. If `--with-coverage` was used, run coverage again and show before/after comparison
-3. Report summary with actual values from command output
+#### Save the plan:
 
-#### Rollback on Failure
+After the Plan agent returns, use `date +%Y%m%d-%H%M%S` to get a timestamp, then write the agent's output to `testify-plan-<timestamp>.md` in the project root using the Write tool.
 
-If the full test suite fails after implementation, offer:
-- "Revert all changes"
-- "Keep changes and debug together"
-- "Keep changes, I'll fix manually"
+Display the file path to the user so they can open it and run `/tdd` or implement manually at their own pace.
 
 ## Uncertainty Handling
 
@@ -201,7 +206,9 @@ If the full test suite fails after implementation, offer:
 - Negative test gap analysis runs every time (not behind a flag) because untested validations are a fundamental quality concern
 - The target path can be a test directory OR a source directory — infer the counterpart accordingly
 - When `--export` is set, generate `testify-report-<timestamp>.md` using `date +%Y%m%d-%H%M%S`
+- When `--plan` is set, spawn a Plan subagent and save `testify-plan-<timestamp>.md` to the project root — do NOT implement fixes inline
 - Analysis always runs in a subagent for context isolation
+- `--plan` exists to keep context clean: implementation happens in a separate session using the saved plan
 
 ---
 
@@ -209,6 +216,6 @@ If the full test suite fails after implementation, offer:
 
 All reference documents are in `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/`:
 
-- **philosophy.md** — Test philosophy principles (read before analysis or implementation)
+- **philosophy.md** — Test philosophy principles (read before analysis)
 - **analysis-prompt.md** — Instructions for the analysis-agent subagent
 - **report-template.md** — Markdown template for the alignment report
