@@ -6,7 +6,7 @@
     "name": "Michael Hargiss"
   },
   "license": "MIT",
-  "agents": ["./agents/analysis-agent.md"],
+  "agents": ["./agents/analysis-agent.md", "./agents/tdd-agent.md"],
   "skills": "./skills/",
   "keywords": ["development", "testing", "tdd", "bdd", "spec", "given-when-then", "test-philosophy", "coverage", "quality"]
 }

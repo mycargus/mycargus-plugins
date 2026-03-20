@@ -30,7 +30,7 @@ Test-Driven Development workflow guided by Given/When/Then specifications and th
 3. Functional Core / Imperative Shell code design — pure logic separated from I/O
 4. Minimal implementation — only write code required by the current test
 
-**Philosophy reference:** See Embedded References below.
+**Philosophy reference:** `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md`
 **Spec format reference:** See Embedded References below.
 
 ## Execution Strategy
@@ -97,38 +97,17 @@ If `--plan` is not set: Ask the user to confirm before proceeding. Use AskUserQu
 
 #### Step 3: Spawn TDD Agent
 
-Spawn a `general-purpose` agent with a prompt that includes:
+Spawn a `tdd-agent` with the following context:
 
-1. **Role**: "You are a TDD agent. Implement features by strictly following the Red-Green-Refactor cycle for each scenario."
-2. **Philosophy**: Include the complete Test Philosophy from Embedded References (copy verbatim) in the spawn prompt
-3. **Spec format**: Include the complete Spec Format from Embedded References (copy verbatim) in the spawn prompt
-4. **Project context** (detected in Phase 1):
+1. **Project context** (detected in Phase 1):
    - Language/framework
    - Test runner command
    - Test file pattern
    - Source directory
    - Test directory
-5. **Scenarios**: The selected scenarios, formatted as numbered Given/When/Then blocks
-6. **Test naming convention** — follow RITEway principles. Each test should answer the 5 Questions structurally. When the project uses a RITEway assertion library, map Given/When/Then to RITEway's `assert()` interface:
-   - `given`: the precondition (from the spec's Given clause)
-   - `should`: the expected behavior (from When + Then)
-   - `actual`: the actual return value
-   - `expected`: the expected return value
-   - Example: Given "an empty cart" / When "adding an item" / Then "cart contains 1 item" becomes `assert({ given: 'an empty cart', should: 'contain 1 item after adding', actual: cart.count(), expected: 1 })`
-   - When RITEway is not available, use descriptive test names that mirror the Given/When/Then language from the spec.
-7. **Execution protocol** — include this in the spawn prompt:
-   - **RED**: Write a failing test for the scenario. Test observable behavior, follow RITE principles, answer the 5 Questions, match project conventions. Run tests — confirm failure.
-     - Determine test type: pure logic (calculation, transformation, validation) gets a unit test with no mocks. I/O behavior (file ops, network, CLI) gets an integration test through real entry points.
-   - **GREEN**: Write minimum code to pass. Apply Functional Core / Imperative Shell — pure logic in pure functions (no I/O, deterministic), I/O in thin wrapper functions. If the scenario requires both, write them as separate functions. Do NOT add code beyond what the test requires. Run tests — confirm ALL tests pass.
-   - **REFACTOR**: Review for I/O mixed with logic (extract pure functions), duplication (extract only if genuinely duplicated), naming clarity, test quality (still RITE? testing behavior not implementation?). Re-run tests if changes made. If no refactoring needed, state why briefly.
-   - **VALIDATE** (if validate is enabled and testify is available): After each scenario's REFACTOR step, review code design and test quality alignment against the test philosophy. Check: Is I/O separated from logic? Are tests testing observable behavior? Are there untested error paths introduced by this scenario? Fix issues before proceeding to the next scenario. This catches design drift early rather than accumulating it across all scenarios.
-   - Between scenarios, output: `Scenario {N}/{total}: {name} — {test count} tests passing`
-   - After all scenarios: run full test suite, summarize tests written (unit pure / unit mocked / integration), list pure functions, I/O shells, and orchestrators created.
-8. **Code design principles**: Functional Core / Imperative Shell is mandatory. Pure functions get unit tests (no mocks). I/O gets integration tests. Never mock pure functions. Max 2-3 mocks per test for unavailable external services only.
-9. **Output expectations**: Show actual test output (not summaries). Show actual code written. Never fabricate test results. If a test unexpectedly fails during GREEN, debug and fix — do NOT skip.
-10. **Validate instructions**:
-   - If validate is enabled: "Run VALIDATE after each scenario's REFACTOR step (per-scenario code design and test quality review). After all scenarios are complete, the parent skill will invoke /mikey:testify for a final comprehensive review."
-   - If validate is disabled: "No validation step. Skip VALIDATE between scenarios."
+   - Existing test style conventions (assertion library, naming, structure)
+2. **Scenarios**: The selected scenarios, formatted as numbered Given/When/Then blocks
+3. **Validate**: If validate is enabled, include "VALIDATE is enabled — run the VALIDATE step after each scenario's REFACTOR step. After all scenarios, the parent skill will invoke /mikey:testify for a final comprehensive review." If disabled, include "VALIDATE is disabled — skip the VALIDATE step between scenarios."
 
 Wait for agent completion.
 
@@ -140,6 +119,8 @@ After the agent completes:
 3. If `--export`: write report (see Export section)
 
 ### Phase 2B: Interactive Mode (no spec path)
+
+Before starting the interactive loop, read the test philosophy from `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` and apply those principles throughout.
 
 #### Step 1: Prompt for Behavior
 
@@ -166,7 +147,7 @@ Use AskUserQuestion to get the user's input.
 
 #### Step 3: RED — Write Failing Test
 
-1. Apply the Test Philosophy from Embedded References below
+1. Apply the test philosophy principles
 2. Write a test that describes the expected behavior:
    - Test observable behavior (return values, errors), NOT implementation
    - Follow RITE principles
@@ -187,16 +168,17 @@ Use AskUserQuestion to get the user's input.
    - If the scenario involves both logic and I/O, write them as separate functions
 3. Do NOT add code beyond what the test requires
 4. Run the test suite — show all tests passing
+5. **Discipline check**: Verify every branch and guard clause in the new code is exercised by a test. If you added defensive code (null checks, input validation, error guards) that no test exercises, remove it — it violates minimal implementation. Re-run tests if you removed code.
 
 #### Step 5: REFACTOR
 
-1. Review the implementation for:
-   - **I/O mixed with logic** → extract pure functions
+1. **Classify** each function written or modified as Pure (no I/O, deterministic), I/O (reads/writes external systems), or Orchestrator (coordinates pure + I/O). Any function that mixes data transformation with I/O is a Violation — extract the pure logic into a separate function.
+2. **Review** for:
    - **Duplication** → extract if genuinely duplicated
    - **Naming clarity** → functions and variables express intent
    - **Test quality** → still RITE? Testing behavior, not implementation?
-2. If changes needed, apply them and re-run tests
-3. If no refactoring needed, state why briefly
+3. If changes needed, apply them and re-run tests
+4. If no refactoring needed, state why briefly
 
 #### Step 6: Loop
 
@@ -278,7 +260,7 @@ When `--export` is set, write a session report to `sdd-report-<timestamp>.md` us
 
 ## Important Notes
 
-- Apply the Test Philosophy from Embedded References before any analysis or implementation
+- Read and apply the test philosophy from `${CLAUDE_PLUGIN_ROOT}/skills/testify/references/philosophy.md` before any analysis or implementation
 - Apply the Spec Format from Embedded References when parsing spec files
 - The TDD cycle is strict: RED (failing test) → GREEN (minimal pass) → REFACTOR. Never skip steps.
 - Code design (functional core / imperative shell) is applied during GREEN and REFACTOR, not as a separate phase
@@ -287,169 +269,6 @@ When `--export` is set, write a session report to `sdd-report-<timestamp>.md` us
 ---
 
 ## Embedded References
-
-### Test Philosophy
-
-This document contains the complete test philosophy. These principles are language-agnostic.
-
-#### Goal: Confidence in Code Changes
-
-Tests that provide high confidence allow refactoring without fear—and without rewriting tests.
-
-#### Core Principles
-
-##### 1. Test Observable Behavior, Not Implementation
-
-Focus on **what the code returns**, not how it works internally.
-
-```
-# GOOD: Tests observable behavior
-result = get_user_by_id(123)
-assert result == { id: 123, name: "John" }
-
-# BAD: Tests implementation details
-get_user_by_id(123)
-assert mock_database.query.was_called()
-assert mock_cache.set.was_called()
-```
-
-**Litmus test**: Can you refactor code without changing tests? If yes, high confidence.
-
-##### 2. Prefer Integration Tests
-
-- Test the system as users interact with it
-- Catch issues unit tests miss
-- Resistant to refactoring
-- Provide higher confidence per test
-
-**Test pyramid**:
-- **Many integration tests**: CLI commands, public API entry points
-- **Some unit tests**: Pure functions, utilities, data transformations
-- **Few mocks**: Only for external dependencies (unavailable runtimes, external APIs)
-
-##### 3. Don't Unit Test I/O
-
-I/O operations should be tested via integration tests:
-- **Unit tests**: Pure functions, business logic, calculations
-- **Integration tests**: CLI commands, file operations, API calls
-
-If mocking I/O in unit tests → extract pure logic OR write integration test instead.
-
-##### 4. Separate Logic from I/O (Functional Core / Imperative Shell)
-
-| Layer | Description | Testing |
-|-------|-------------|---------|
-| **Pure Core** | No I/O, deterministic, data transformation | Unit tests, NO mocks |
-| **I/O Shell** | File reads, console output, network | Integration tests OR dependency injection |
-| **Orchestrator** | Coordinates pure + I/O | Integration tests via entry point |
-
-**Example (pseudocode):**
-
-```
-# BAD: I/O mixed with logic
-function process_file(path):
-    data = read_file(path)           # I/O
-    parsed = parse(data)             # Pure
-    filtered = filter_active(parsed) # Pure
-    print("Found " + len(filtered))  # I/O
-    return filtered
-
-# GOOD: Separated
-function filter_active(items):       # Pure - easy to test
-    return [x for x in items if x.active]
-
-function process_file(path):         # I/O shell
-    data = read_file(path)
-    parsed = parse(data)
-    filtered = filter_active(parsed)
-    print("Found " + len(filtered))
-    return filtered
-```
-
-#### RITE Tests
-
-Every test should be:
-
-- **Readable**: Clear structure, descriptive names, obvious arrange/act/assert
-- **Isolated**: No shared mutable state, no order dependencies, each test stands alone
-- **Thorough**: Covers happy paths, edge cases, and error conditions
-- **Explicit**: Tests observable behavior (return values, errors), NOT internal state or implementation details
-
-#### 5 Questions Every Test Must Answer
-
-1. What is the unit under test?
-2. What should it do? (behavior, not implementation)
-3. What is the actual output?
-4. What is the expected output?
-5. How do you reproduce the failure?
-
-##### RITEway Assertion Libraries
-
-The [RITEway](https://github.com/paralleldrive/riteway) assertion style enforces all 5 questions structurally — each assertion requires `given`, `should`, `actual`, and `expected` fields, making it impossible to write a test that doesn't answer them. Failures read like bug reports: "Given X, should Y, but got Z."
-
-Available libraries:
-- **JavaScript**: [riteway](https://github.com/paralleldrive/riteway)
-- **Ruby**: [riteway-ruby](https://github.com/mycargus/riteway-ruby)
-- **Go**: [riteway-golang](https://github.com/mycargus/riteway-golang)
-
-If a project already uses RITEway assertions, evaluate compliance. If not, do not flag non-compliance — but recommend RITEway when tests consistently fail to answer the 5 questions.
-
-#### Anti-Patterns
-
-| Anti-Pattern | Why It's Bad | Fix |
-|--------------|--------------|-----|
-| Testing implementation details | Breaks on refactor | Test outputs, not internals |
-| Over-mocking | Tests don't validate real behavior | Use integration tests |
-| Brittle assertions | Exact strings, whitespace | Assert structure, not format |
-| I/O in unit tests | Couples to filesystem/network | Extract pure logic |
-| Testing private state | Implementation detail | Test public interface |
-| Call count assertions | Implementation detail | Assert return value |
-
-#### Identifying Function Types
-
-**Pure Core** (unit testable without mocks):
-- No file, network, database, or console I/O
-- No mutations of external state
-- Returns data based solely on inputs
-- Deterministic (same input → same output)
-
-**I/O Shell** (integration testable):
-- Reads from or writes to external systems (files, network, database, stdout)
-- Has side effects
-- Coordinates with external resources
-
-**Orchestrators** (integration testable via entry point):
-- Calls both pure and I/O functions
-- Usually an entry point (main, command handler, request handler)
-
-#### When to Mock
-
-**Acceptable Mocking**
-- External services in integration tests (APIs, databases)
-- System clock for time-dependent tests
-- Unavailable runtimes (e.g., modules that only run in a specific runtime environment)
-- Limit: 2-3 mocks per test maximum
-
-**Mocking Red Flags**
-- Mocking filesystem in unit tests → extract pure logic instead
-- Mocking more than 2-3 things → code may be too tightly coupled
-- Mocking pure functions → never needed
-- More mock setup than test code → design smell
-
-#### Test Coverage Guidelines
-
-- **Coverage target**: Check the project's test configuration for thresholds
-- **Integration tests**: Entry point is CLI binary or public API
-- **Unit tests**: Pure functions and business logic in isolation
-
-#### Further Reading
-
-- [Functional Core, Imperative Shell](https://www.destroyallsoftware.com/screencasts/catalog/functional-core-imperative-shell)
-- [Mocking is a Code Smell](https://medium.com/javascript-scene/mocking-is-a-code-smell-944a70c90a6a)
-- [TDD the RITE Way](https://medium.com/javascript-scene/tdd-the-rite-way-53c9b46f45e3)
-- [5 Questions Every Unit Test Must Answer](https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d)
-
----
 
 ### Spec Format
 
