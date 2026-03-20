@@ -55,7 +55,19 @@ Test-Driven Development workflow guided by Given/When/Then specifications and th
    - If `--validate` was not explicitly set: default to `true`
    - If `--validate` was explicitly set to `false`: respect the flag
 
-4. **Route to mode**:
+4. **Display setup summary** to the user before proceeding:
+   ```
+   Phase 1: Setup
+   - Target: {path or "interactive mode"}
+   - Project: {language}, {test pattern} convention
+   - Flags: {enabled flags}
+   - Test runner: {detected runner}
+   - Test directory: {path or "TBD"}
+   - Source directory: {path or "TBD"}
+   ```
+   In interactive mode or when directories can't be determined yet, show what's known and note the rest as "TBD — will determine from first scenario."
+
+5. **Route to mode**:
    - If `path` is provided → **Agent Mode** (Phase 2A)
    - If no `path` → **Interactive Mode** (Phase 2B)
 

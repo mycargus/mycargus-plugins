@@ -60,7 +60,20 @@ Review and align tests with embedded test philosophy. Identifies code design iss
    - If given a test path, find corresponding source files by reading imports
    - If given a source path, find corresponding test files by convention
 
-4. **Run tests with coverage** (if `--with-coverage`):
+4. **Display setup summary** to the user before proceeding:
+   ```
+   Phase 1: Setup
+   - Target: {path} — {language} project, {test pattern} convention
+   - Flags: {enabled flags}
+
+   Source files ({count}):
+   - {grouped by directory}
+
+   Test files ({count}):
+   - {grouped by directory}
+   ```
+
+5. **Run tests with coverage** (if `--with-coverage`):
    - Run the project's coverage command, scoping to the target path if possible
    - Read the coverage output file directly using the Read tool
    - Extract per-file summaries: coverage percentages, uncovered functions/lines/branches
