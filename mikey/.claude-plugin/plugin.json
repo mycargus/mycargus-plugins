@@ -8,5 +8,19 @@
   "license": "MIT",
   "agents": ["./agents/analysis-agent.md", "./agents/tdd-agent.md"],
   "skills": "./skills/",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/allow-plugin-reads.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ]
+  },
   "keywords": ["development", "testing", "tdd", "bdd", "spec", "given-when-then", "test-philosophy", "coverage", "quality"]
 }
