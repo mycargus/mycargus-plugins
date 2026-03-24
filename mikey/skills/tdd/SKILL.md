@@ -1,6 +1,6 @@
 ---
 name: mikey:tdd
-description: TDD workflow driven by Given/When/Then specifications. Provide a spec file or folder path for autonomous batch processing, or run without a path for an interactive TDD loop. Implements code using Functional Core / Imperative Shell design principles.
+description: "TDD workflow driven by Given/When/Then specifications. Provide a spec file or folder path for autonomous batch processing, or run without a path for an interactive TDD loop. Implements code using Functional Core / Imperative Shell design principles."
 argument-hint: [path] [--plan] [--validate] [--export]
 user-invocable: true
 ---
