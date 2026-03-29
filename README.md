@@ -4,7 +4,7 @@ My personal Claude Code plugin collection.
 
 ## Prerequisites
 
-- [jq](https://jqlang.github.io/jq/) — used by plugin hooks to parse tool input
+- [Claude Code CLI](https://https://code.claude.com/docs/en/setup)
 
 ## Installation
 
